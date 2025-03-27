@@ -28,48 +28,117 @@
             width: 100%;
             z-index: 1;
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            padding: 0 20px;
         }
 
-        .button {
-            padding: 12px 20px;
-            margin: 6px;
-            background: rgba(0,0,0,0.7);
+        .dpad-circle {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+
+        .dpad-circle button {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            font-size: 20px;
+            color: white;
+        }
+
+        .dpad-circle .up    { top: 0; left: 55px; }
+        .dpad-circle .down  { bottom: 0; left: 55px; }
+        .dpad-circle .left  { left: 0; top: 55px; }
+        .dpad-circle .right { right: 0; top: 55px; }
+
+        .fire-button {
+            width: 80px;
+            height: 80px;
+            background: red;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 18px;
+        }
+
+        .pref-button {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border: none;
+            font-size: 26px;
+            color: white;
+        }
+
+        .preferences {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 999;
+            display: none;
+        }
+
+        .preferences input[type=range] {
+            width: 100%;
+        }
+
+        .preferences label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .preferences h3 {
+            margin-top: 0;
+        }
+
+        .close-pref {
+            background: #444;
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 6px 12px;
+            margin-top: 10px;
+            border-radius: 6px;
         }
-
-        .dpad { display: grid; grid-template-columns: auto auto auto; gap: 5px; }
-        .dpad button { width: 60px; height: 60px; font-size: 20px; }
-        .toggles { display: flex; flex-direction: column; align-items: center; }
-        label { color: white; }
     </style>
 </head>
 <body>
     <img id="video-feed" src="{{ url_for('video_feed') }}" onclick="handleCalibrate(event)">
 
     <div class="overlay">
-        <div class="dpad">
-            <button onclick="sendCommand('UP')">↑</button>
-            <div></div>
-            <button onclick="sendCommand('DOWN')">↓</button>
-            <button onclick="sendCommand('LEFT')">←</button>
-            <div></div>
-            <button onclick="sendCommand('RIGHT')">→</button>
+        <div class="dpad-circle">
+            <button class="up" onclick="sendCommand('UP')">↑</button>
+            <button class="down" onclick="sendCommand('DOWN')">↓</button>
+            <button class="left" onclick="sendCommand('LEFT')">←</button>
+            <button class="right" onclick="sendCommand('RIGHT')">→</button>
         </div>
 
-        <button class="button" onclick="sendCommand('FIRE')">🔥 FIRE</button>
+        <button class="fire-button" onclick="sendCommand('FIRE')">FIRE</button>
+        <button class="pref-button" onclick="togglePreferences()">⚙</button>
+    </div>
 
-        <div class="toggles">
-            <label><input type="checkbox" id="trackToggle"> Track Faces</label>
-            <label><input type="checkbox" id="autoFireToggle"> Auto Fire</label>
-            <button class="button" onclick="toggleSettings()">Update Settings</button>
-            <button class="button" onclick="alert('Tap the video to set new target')">Calibrate</button>
-        </div>
+    <div class="preferences" id="prefPanel">
+        <h3>Preferences</h3>
+        <label><input type="checkbox" id="trackToggle"> Track Faces</label>
+        <label><input type="checkbox" id="autoFireToggle"> Auto Fire</label>
+        <label for="brightness">Brightness</label>
+        <input type="range" id="brightness" min="-1" max="1" step="0.1" value="0.1">
+        <label for="contrast">Contrast</label>
+        <input type="range" id="contrast" min="-1" max="1" step="0.1" value="0">
+        <label for="saturation">Saturation</label>
+        <input type="range" id="saturation" min="-1" max="1" step="0.1" value="0">
+        <button class="close-pref" onclick="togglePreferences()">Close</button>
+        <button class="close-pref" onclick="applySettings()">Apply</button>
+        <button class="close-pref" onclick="alert('Tap video to calibrate target')">Calibrate</button>
     </div>
 
     <script>
@@ -79,13 +148,22 @@
                 .then(data => console.log(data));
         }
 
-        function toggleSettings() {
+        function togglePreferences() {
+            const pref = document.getElementById("prefPanel");
+            pref.style.display = pref.style.display === "none" ? "block" : "none";
+        }
+
+        function applySettings() {
             const track = document.getElementById('trackToggle').checked;
             const autoFire = document.getElementById('autoFireToggle').checked;
+            const brightness = parseFloat(document.getElementById('brightness').value);
+            const contrast = parseFloat(document.getElementById('contrast').value);
+            const saturation = parseFloat(document.getElementById('saturation').value);
+
             fetch('/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ track, auto_fire: autoFire })
+                body: JSON.stringify({ track, auto_fire: autoFire, brightness, contrast, saturation })
             });
         }
 

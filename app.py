@@ -2,7 +2,6 @@ from flask import Flask, render_template, Response, request, jsonify
 from picamera2 import Picamera2
 import cv2
 import threading
-import time
 
 app = Flask(__name__)
 
@@ -13,13 +12,13 @@ picam2.start()
 picam2.set_controls({
     "AwbEnable": True,
     "AeEnable": True,
-    "Brightness": 0.1,   # Can tweak this if needed
+    "Brightness": 0.1,
 })
 
 # Face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
-# Default target zone (center)
+# Globals
 target_x, target_y = 320, 240
 auto_track = False
 auto_fire = False
@@ -34,19 +33,15 @@ def generate_frames():
         frame = cv2.resize(frame, (640, 480))
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        # Face detection
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
-        # Draw target crosshair
         cv2.drawMarker(frame, (target_x, target_y), (0, 0, 255), cv2.MARKER_CROSS, 30, 2)
 
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame_bytes = buffer.tobytes()
-
+        _, buffer = cv2.imencode('.jpg', frame)
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
 
 @app.route('/')
 def index():
@@ -59,7 +54,6 @@ def video_feed():
 @app.route('/command/<cmd>', methods=['GET'])
 def send_command(cmd):
     global latest_command
-    # Simulate Arduino communication for now
     with lock:
         latest_command = cmd
         print(f"[COMMAND] Sent to Arduino: {cmd}")
@@ -81,6 +75,21 @@ def update_settings():
     auto_track = data.get('track', False)
     auto_fire = data.get('auto_fire', False)
     print(f"[SETTINGS] Track: {auto_track}, Auto Fire: {auto_fire}")
+
+    # Apply camera settings
+    brightness = float(data.get('brightness', 0.0))
+    contrast = float(data.get('contrast', 0.0))
+    saturation = float(data.get('saturation', 0.0))
+    print(f"[CAMERA] Brightness: {brightness}, Contrast: {contrast}, Saturation: {saturation}")
+    try:
+        picam2.set_controls({
+            "Brightness": brightness,
+            "Contrast": contrast,
+            "Saturation": saturation
+        })
+    except Exception as e:
+        print(f"[ERROR] Failed to set camera settings: {e}")
+
     return jsonify(success=True)
 
 if __name__ == '__main__':
