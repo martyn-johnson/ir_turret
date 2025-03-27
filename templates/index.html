@@ -204,24 +204,42 @@
         }
 
         let commandInterval;
+        let isLongPress = false;
 
         function startCommand(cmd) {
+            isLongPress = true;
             sendCommand(cmd);
             commandInterval = setInterval(() => sendCommand(cmd), 100);
         }
 
         function stopCommand() {
             clearInterval(commandInterval);
+            isLongPress = false;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             const dpadButtons = document.querySelectorAll('.dpad-circle button');
             dpadButtons.forEach(button => {
-                button.addEventListener('mousedown', function() {
-                    startCommand(this.className.toUpperCase());
-                });
+                const command = button.className.toUpperCase();
+
+                // Mouse events
+                button.addEventListener('mousedown', () => startCommand(command));
                 button.addEventListener('mouseup', stopCommand);
                 button.addEventListener('mouseleave', stopCommand);
+
+                // Touch events for mobile
+                button.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); // Prevent default touch behavior
+                    startCommand(command);
+                });
+                button.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    if (!isLongPress) {
+                        sendCommand(command); // Handle single tap
+                    }
+                    stopCommand();
+                });
+                button.addEventListener('touchcancel', stopCommand);
             });
         });
     </script>
