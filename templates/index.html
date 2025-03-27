@@ -210,9 +210,17 @@
         function handleCalibrate(e) {
             if (!isCalibrating) return; // Only calibrate if in calibration mode
 
-            const rect = document.getElementById('video-feed').getBoundingClientRect(); // Use video-feed's bounding box
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const videoFeed = document.getElementById('video-feed');
+            const rect = videoFeed.getBoundingClientRect(); // Use video-feed's bounding box
+
+            // Calculate the scaling factor of the video feed
+            const scaleX = videoFeed.naturalWidth / rect.width;
+            const scaleY = videoFeed.naturalHeight / rect.height;
+
+            // Adjust the click position based on the scaling factor
+            const x = Math.round((e.clientX - rect.left) * scaleX);
+            const y = Math.round((e.clientY - rect.top) * scaleY);
+
             console.log(`New target set: (${x}, ${y})`); // Print to console
 
             fetch('/calibrate', {
