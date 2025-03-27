@@ -124,8 +124,8 @@
     </style>
 </head>
 <body>
-    <div id="calibration-overlay"></div> <!-- Red overlay for calibration mode -->
-    <img id="video-feed" src="{{ url_for('video_feed') }}" onclick="handleCalibrate(event)">
+    <div id="calibration-overlay" onclick="handleCalibrate(event)"></div> <!-- Red overlay for calibration mode -->
+    <img id="video-feed" src="{{ url_for('video_feed') }}">
 
     <div class="overlay">
         <div class="dpad-circle">
@@ -210,7 +210,7 @@
         function handleCalibrate(e) {
             if (!isCalibrating) return; // Only calibrate if in calibration mode
 
-            const rect = e.target.getBoundingClientRect();
+            const rect = document.getElementById('video-feed').getBoundingClientRect(); // Use video-feed's bounding box
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             console.log(`New target set: (${x}, ${y})`); // Print to console
