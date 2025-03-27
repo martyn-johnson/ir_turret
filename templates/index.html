@@ -129,6 +129,9 @@
 
     <div class="preferences" id="prefPanel">
         <h3>Preferences</h3>
+        <button class="close-pref" onclick="togglePreferences()">Close</button>
+        <button class="close-pref" onclick="togglePreferences(); alert('Tap video to calibrate target')">Calibrate</button>
+        
         <label><input type="checkbox" id="trackToggle"> Track Faces</label>
         <label><input type="checkbox" id="autoFireToggle"> Auto Fire</label>
 
@@ -147,11 +150,11 @@
         <label for="gain">Gain (ISO)</label>
         <input type="range" id="gain" min="1" max="8" step="0.1" value="1.0">
 
-        <button class="close-pref" onclick="togglePreferences()">Close</button>
-        <button class="close-pref" onclick="alert('Tap video to calibrate target')">Calibrate</button>
     </div>
 
     <script>
+        let isCalibrating = false; // Flag to track calibration mode
+
         function sendCommand(cmd) {
             fetch('/command/' + cmd)
                 .then(res => res.json())
@@ -193,6 +196,8 @@
         });
 
         function handleCalibrate(e) {
+            if (!isCalibrating) return; // Only calibrate if in calibration mode
+
             const rect = e.target.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
@@ -202,6 +207,28 @@
                 body: JSON.stringify({ x, y })
             }).then(() => alert(`New target set: (${x}, ${y})`));
         }
+
+        function toggleCalibrationMode() {
+            isCalibrating = !isCalibrating;
+            alert(isCalibrating ? "Calibration mode enabled" : "Calibration mode disabled");
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add a button or other mechanism to toggle calibration mode
+            const calibrateButton = document.createElement('button');
+            calibrateButton.textContent = "Toggle Calibration";
+            calibrateButton.style.position = "fixed";
+            calibrateButton.style.top = "10px";
+            calibrateButton.style.right = "10px";
+            calibrateButton.style.zIndex = "1000";
+            calibrateButton.style.padding = "10px";
+            calibrateButton.style.background = "#444";
+            calibrateButton.style.color = "white";
+            calibrateButton.style.border = "none";
+            calibrateButton.style.borderRadius = "5px";
+            calibrateButton.addEventListener('click', toggleCalibrationMode);
+            document.body.appendChild(calibrateButton);
+        });
 
         let commandInterval;
         let isLongPress = false;
@@ -257,6 +284,21 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Request fullscreen on user interaction
             document.body.addEventListener('click', enableFullscreen, { once: true });
+
+            let touchStartY = 0;
+            let touchEndY = 0;
+
+            // Detect swipe down gesture
+            document.body.addEventListener('touchstart', (e) => {
+                touchStartY = e.changedTouches[0].screenY;
+            });
+
+            document.body.addEventListener('touchend', (e) => {
+                touchEndY = e.changedTouches[0].screenY;
+                if (touchEndY - touchStartY > 50) { // Swipe down threshold
+                    enableFullscreen();
+                }
+            });
         });
     </script>
 </body>
