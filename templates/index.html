@@ -202,6 +202,28 @@
                 body: JSON.stringify({ x, y })
             }).then(() => alert(`New target set: (${x}, ${y})`));
         }
+
+        let commandInterval;
+
+        function startCommand(cmd) {
+            sendCommand(cmd);
+            commandInterval = setInterval(() => sendCommand(cmd), 100);
+        }
+
+        function stopCommand() {
+            clearInterval(commandInterval);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dpadButtons = document.querySelectorAll('.dpad-circle button');
+            dpadButtons.forEach(button => {
+                button.addEventListener('mousedown', function() {
+                    startCommand(this.className.toUpperCase());
+                });
+                button.addEventListener('mouseup', stopCommand);
+                button.addEventListener('mouseleave', stopCommand);
+            });
+        });
     </script>
 </body>
 </html>
