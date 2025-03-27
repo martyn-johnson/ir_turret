@@ -5,21 +5,30 @@ import threading
 
 app = Flask(__name__)
 
-# Start camera
+# Start camera at high resolution (wide format for Camera Module 3 Wide)
 picam2 = Picamera2()
-picam2.configure(picam2.create_preview_configuration(main={"size": (640, 480)}))
+picam2.configure(picam2.create_preview_configuration(
+    main={"size": (1280, 720)},  # widescreen 16:9 ratio
+    controls={"AfMode": 1}       # Auto focus mode
+))
 picam2.start()
+
+# Apply improved default controls
 picam2.set_controls({
     "AwbEnable": True,
     "AeEnable": True,
-    "Brightness": 0.1,
+    "Brightness": 0.2,
+    "Contrast": 1.3,
+    "Saturation": 0.8,
+    "Sharpness": 1.0,
+    "AfMode": 1  # continuous autofocus
 })
 
 # Face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
 # Globals
-target_x, target_y = 320, 240
+target_x, target_y = 640, 360  # center of 1280x720
 auto_track = False
 auto_fire = False
 latest_command = None
@@ -30,7 +39,7 @@ def generate_frames():
 
     while True:
         frame = picam2.capture_array()
-        frame = cv2.resize(frame, (640, 480))
+        frame = cv2.resize(frame, (1280, 720))
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -63,8 +72,8 @@ def send_command(cmd):
 def calibrate():
     global target_x, target_y
     data = request.get_json()
-    target_x = int(data.get('x', 320))
-    target_y = int(data.get('y', 240))
+    target_x = int(data.get('x', 640))
+    target_y = int(data.get('y', 360))
     print(f"[CALIBRATION] Target set to: ({target_x}, {target_y})")
     return jsonify(success=True, x=target_x, y=target_y)
 
@@ -76,17 +85,18 @@ def update_settings():
     auto_fire = data.get('auto_fire', False)
     print(f"[SETTINGS] Track: {auto_track}, Auto Fire: {auto_fire}")
 
-    # Apply camera settings
-    brightness = float(data.get('brightness', 0.0))
-    contrast = float(data.get('contrast', 0.0))
-    saturation = float(data.get('saturation', 0.0))
-    print(f"[CAMERA] Brightness: {brightness}, Contrast: {contrast}, Saturation: {saturation}")
+    # Apply additional camera settings
     try:
-        picam2.set_controls({
-            "Brightness": brightness,
-            "Contrast": contrast,
-            "Saturation": saturation
-        })
+        settings = {
+            "Brightness": float(data.get("brightness", 0.2)),
+            "Contrast": float(data.get("contrast", 1.3)),
+            "Saturation": float(data.get("saturation", 0.8)),
+            "Sharpness": float(data.get("sharpness", 1.0)),
+            "AnalogueGain": float(data.get("gain", 1.0)),
+        }
+
+        print(f"[CAMERA] Applying settings: {settings}")
+        picam2.set_controls(settings)
     except Exception as e:
         print(f"[ERROR] Failed to set camera settings: {e}")
 
