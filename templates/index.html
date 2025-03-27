@@ -33,10 +33,13 @@
             display: none; /* Hidden by default */
         }
 
-        .overlay {
+        #control-overlay {
             position: fixed;
             bottom: 10px;
-            width: 100vw;
+            width: 95vw; /* Set to 95% of the view width */
+            margin: 0 auto; /* Center horizontally */
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%); /* Adjust for centering */
             z-index: 1;
             display: flex;
             justify-content: space-between;
@@ -127,7 +130,7 @@
     <div id="calibration-overlay" onclick="handleCalibrate(event)"></div> <!-- Red overlay for calibration mode -->
     <img id="video-feed" src="{{ url_for('video_feed') }}">
 
-    <div class="overlay">
+    <div id="control-overlay">
         <div class="dpad-circle">
             <button class="up" onclick="sendCommand('UP')">↑</button>
             <button class="down" onclick="sendCommand('DOWN')">↓</button>
@@ -235,7 +238,9 @@
         function toggleCalibrationMode(enable) {
             isCalibrating = enable !== undefined ? enable : !isCalibrating;
             const calibrationOverlay = document.getElementById('calibration-overlay');
+            const controlOverlay = document.getElementById('control-overlay');
             calibrationOverlay.style.display = isCalibrating ? 'block' : 'none';
+            controlOverlay.style.display = isCalibrating ? 'none' : 'block'; // Hide controls during calibration
         }
 
         let commandInterval;
@@ -289,9 +294,15 @@
             }
         }
 
+        function isMobileDevice() {
+            return /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Request fullscreen on user interaction
-            document.body.addEventListener('click', enableFullscreen, { once: true });
+            // Request fullscreen on user interaction only for mobile devices
+            if (isMobileDevice()) {
+                document.body.addEventListener('click', enableFullscreen, { once: true });
+            }
 
             let touchStartY = 0;
             let touchEndY = 0;
