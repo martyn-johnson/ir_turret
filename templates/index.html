@@ -25,12 +25,11 @@
         .overlay {
             position: fixed;
             bottom: 10px;
-            width: 100%;
+            width: 100vw;
             z-index: 1;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
         }
 
         .dpad-circle {
@@ -124,8 +123,8 @@
             <button class="right" onclick="sendCommand('RIGHT')">→</button>
         </div>
 
-        <button class="fire-button" onclick="sendCommand('FIRE')">FIRE</button>
         <button class="pref-button" onclick="togglePreferences()">⚙</button>
+        <button class="fire-button" onclick="sendCommand('FIRE')">FIRE</button>
     </div>
 
     <div class="preferences" id="prefPanel">
