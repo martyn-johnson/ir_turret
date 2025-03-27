@@ -22,6 +22,11 @@
             z-index: 0;
         }
 
+        #video-feed.calibrating {
+            background-color: rgba(255, 0, 0, 0.3); /* Transparent red tint */
+            mix-blend-mode: multiply;
+        }
+
         .overlay {
             position: fixed;
             bottom: 10px;
@@ -201,16 +206,25 @@
             const rect = e.target.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
+            console.log(`New target set: (${x}, ${y})`); // Print to console
+
             fetch('/calibrate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ x, y })
-            }).then(() => alert(`New target set: (${x}, ${y})`));
+            }).then(() => {
+                toggleCalibrationMode(false); // Exit calibration mode
+            });
         }
 
-        function toggleCalibrationMode() {
-            isCalibrating = !isCalibrating;
-            alert(isCalibrating ? "Calibration mode enabled" : "Calibration mode disabled");
+        function toggleCalibrationMode(enable) {
+            isCalibrating = enable !== undefined ? enable : !isCalibrating;
+            const videoFeed = document.getElementById('video-feed');
+            if (isCalibrating) {
+                videoFeed.classList.add('calibrating');
+            } else {
+                videoFeed.classList.remove('calibrating');
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -226,7 +240,7 @@
             calibrateButton.style.color = "white";
             calibrateButton.style.border = "none";
             calibrateButton.style.borderRadius = "5px";
-            calibrateButton.addEventListener('click', toggleCalibrationMode);
+            calibrateButton.addEventListener('click', () => toggleCalibrationMode());
             document.body.appendChild(calibrateButton);
         });
 
