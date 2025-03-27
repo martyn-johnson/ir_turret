@@ -4,29 +4,49 @@
     <title>IR Turret</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { margin: 0; background: black; color: white; font-family: sans-serif; text-align: center; }
-        #video-feed { width: 100vw; height: auto; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+            background-color: black;
+        }
+
+        #video-feed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 0;
+        }
+
         .overlay {
             position: fixed;
             bottom: 10px;
             width: 100%;
+            z-index: 1;
             display: flex;
             justify-content: space-around;
             align-items: center;
             flex-wrap: wrap;
         }
+
         .button {
             padding: 12px 20px;
             margin: 6px;
-            background: #333;
+            background: rgba(0,0,0,0.7);
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 16px;
         }
+
         .dpad { display: grid; grid-template-columns: auto auto auto; gap: 5px; }
         .dpad button { width: 60px; height: 60px; font-size: 20px; }
         .toggles { display: flex; flex-direction: column; align-items: center; }
+        label { color: white; }
     </style>
 </head>
 <body>
@@ -48,7 +68,7 @@
             <label><input type="checkbox" id="trackToggle"> Track Faces</label>
             <label><input type="checkbox" id="autoFireToggle"> Auto Fire</label>
             <button class="button" onclick="toggleSettings()">Update Settings</button>
-            <button class="button" onclick="alert('Tap video to set new target')">Calibrate</button>
+            <button class="button" onclick="alert('Tap the video to set new target')">Calibrate</button>
         </div>
     </div>
 

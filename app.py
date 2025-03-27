@@ -10,6 +10,11 @@ app = Flask(__name__)
 picam2 = Picamera2()
 picam2.configure(picam2.create_preview_configuration(main={"size": (640, 480)}))
 picam2.start()
+picam2.set_controls({
+    "AwbEnable": True,
+    "AeEnable": True,
+    "Brightness": 0.1,   # Can tweak this if needed
+})
 
 # Face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")

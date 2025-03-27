@@ -1,41 +1,51 @@
-# Autonomous IR Turret with Face Tracking (Pi Zero 2 W + Camera Module 3) for Crunchlabs Hack Pack IR Turret by Mark Rober
+# 🎯 Autonomous IR Turret with Face Tracking  
+## Powered by Raspberry Pi Zero 2 W + Camera Module 3  
+### Designed for Crunchlabs Hack Pack IR Turret (by Mark Rober)
 
-A mobile-friendly, Flask-powered web app to control and calibrate an autonomous infrared turret powered by a Raspberry Pi Zero 2 W and the Crunchlabs Hack Pack IR Turret. It supports face tracking, a live video stream from the Pi Camera Module 3, and serial communication with the turret's Arduino controller.
+A mobile-friendly, Flask-powered web app to control and calibrate an autonomous infrared turret using a Raspberry Pi Zero 2 W and the Crunchlabs IR Turret. Features include face tracking, a full-screen live video stream, remote control, and serial communication with the turret's Arduino.
 
 ---
 
 ## 🚀 Features
 
-- Live MJPEG video stream from Pi Camera Module 3
-- Face detection overlays
-- Manual turret controls (via web UI)
-- Auto-tracking and auto-firing modes
-- Calibration system for accurate targeting
-- Communicates with Arduino turret via USB serial
+- 📷 Live MJPEG video stream from Pi Camera Module 3
+- 🤖 Face detection overlays (OpenCV)
+- 🎯 Manual D-Pad + FIRE controls (mobile UI)
+- 🧠 Auto-tracking and auto-firing modes
+- 🎯 Tap-to-calibrate custom target zone
+- 🔌 Serial communication to Arduino turret (via USB)
 
 ---
 
-## 🔧 Updated Setup Instructions
+## ⚙️ Setup Instructions (Raspberry Pi Zero 2 W + Pi Camera 3)
 
 ### 1. Flash Raspberry Pi OS (Bookworm or later)
-- Use Raspberry Pi Imager to install Raspberry Pi OS Lite (64-bit)
-- Enable SSH, Wi-Fi, and set hostname (e.g., `ir-turret.local`)
-- Set username to pi and set a password (important)
+- Use **Raspberry Pi Imager**:
+  - Choose: Raspberry Pi OS Lite (64-bit)
+  - Enable: SSH, set hostname to `ir-turret.local`
+  - Set username to `pi` and create a password
+  - Configure Wi-Fi
 
-### 2. SSH into Pi
+---
+
+### 2. SSH into Your Pi
 
 ```bash
 ssh pi@ir-turret.local
 ```
 
-### 3. Update & Upgrade
+---
+
+### 3. Update the System
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
 sudo reboot
 ```
 
-### 4. Install Required System Packages
+---
+
+### 4. Install Required Dependencies
 
 ```bash
 sudo apt install -y \
@@ -46,56 +56,50 @@ sudo apt install -y \
   libgstreamer1.0-dev libglib2.0-dev v4l-utils
 ```
 
-Then install full OpenCV using pip (needed for face detection):
+Then install full OpenCV (for face detection):
 
 ```bash
 sudo apt remove python3-opencv -y
 pip3 install opencv-python --break-system-packages
 ```
 
-### 5. Test Camera
+---
+
+### 5. Test the Camera
 
 ```bash
 libcamera-hello
 ```
 
-### 6. Set Up Project Directory
+---
+
+### 6. Clone This Project
 
 ```bash
 cd ~
-mkdir ir_turret
+git clone https://github.com/martyn-johnson/ir_turret.git
 cd ir_turret
 ```
 
-### 7. Connect Arduino
+---
 
-Plug the Arduino via USB and check:
+### 7. Connect the Arduino (Crunchlabs IR Turret)
+
+Plug the Arduino in via USB and check:
 
 ```bash
 ls /dev/ttyACM*   # or /dev/ttyUSB*
 ```
 
+---
 
-## ✅ You're Ready to Start Coding!
-
-Create `app.py` and `templates/index.html`, and begin building your turret logic!
-
-### Access the App
-
-Open in browser:
-
-```
-http://ir-turret.local:5000/
-```
-
-
-### Optional: Auto-start Flask App
+### 8. (Optional) Auto-Start Flask App on Boot
 
 ```bash
 sudo nano /etc/systemd/system/turret.service
 ```
 
-Paste and edit:
+Paste the following:
 
 ```ini
 [Unit]
@@ -112,15 +116,51 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-Enable it:
+Then enable and start the service:
 
 ```bash
 sudo systemctl daemon-reexec
 sudo systemctl enable turret.service
+sudo systemctl start turret.service
 ```
 
-If you edit the python code in app.ph you will need to restart the service:
+To restart the service after editing Python files:
 
 ```bash
 sudo systemctl restart turret.service
 ```
+
+---
+
+### 9. Open the Web Interface
+
+From any device on your network:
+
+```
+http://ir-turret.local:5000/
+```
+
+---
+
+## 🛠️ Development Notes
+
+- All camera processing and face detection runs directly on the Pi
+- Web UI is built mobile-first (touch-friendly layout)
+- Serial communication is stubbed in for now (until Arduino is connected)
+- System Python is used (not virtualenv) for compatibility with `picamera2` and `libcamera`
+
+---
+
+## 📦 GitHub Repo
+
+Project code is hosted here:  
+🔗 [https://github.com/martyn-johnson/ir_turret](https://github.com/martyn-johnson/ir_turret)
+
+---
+
+## ✅ Next Up
+
+- Add real-time serial comms to Arduino
+- Prioritize targets by size or position
+- Add sound or face recognition
+- Score tracking or game mode
