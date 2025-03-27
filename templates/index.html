@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IR Turret</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { margin: 0; background: black; text-align: center; }
+        img { width: 100%; max-width: 640px; }
+    </style>
+</head>
+<body>
+    <h2 style="color:white;">IR Turret Camera Feed</h2>
+    <img src="{{ url_for('video_feed') }}">
+</body>
+</html>
