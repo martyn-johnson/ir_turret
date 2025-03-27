@@ -36,6 +36,7 @@ sudo reboot
 ```
 
 ### 4. Install Required System Packages
+
 ```bash
 sudo apt install -y \
   git python3-flask python3-serial \
