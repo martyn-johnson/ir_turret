@@ -36,14 +36,20 @@ sudo reboot
 ```
 
 ### 4. Install Required System Packages
-
 ```bash
 sudo apt install -y \
-  git python3-flask python3-opencv python3-serial \
+  git python3-flask python3-serial \
   python3-picamera2 python3-libcamera libatlas-base-dev \
   libjpeg-dev libopenjp2-7 libopenexr-dev \
   libavcodec-dev libavformat-dev libswscale-dev \
   libgstreamer1.0-dev libglib2.0-dev v4l-utils
+```
+
+Then install full OpenCV using pip (needed for face detection):
+
+```bash
+sudo apt remove python3-opencv -y
+pip3 install opencv-python --break-system-packages
 ```
 
 ### 5. Test Camera
@@ -68,7 +74,21 @@ Plug the Arduino via USB and check:
 ls /dev/ttyACM*   # or /dev/ttyUSB*
 ```
 
-### 8. Optional: Auto-start Flask App
+
+## ✅ You're Ready to Start Coding!
+
+Create `app.py` and `templates/index.html`, and begin building your turret logic!
+
+### Access the App
+
+Open in browser:
+
+```
+http://ir-turret.local:5000/
+```
+
+
+### Optional: Auto-start Flask App
 
 ```bash
 sudo nano /etc/systemd/system/turret.service
@@ -98,16 +118,8 @@ sudo systemctl daemon-reexec
 sudo systemctl enable turret.service
 ```
 
-### 9. Access the App
+If you edit the python code in app.ph you will need to restart the service:
 
-Open in browser:
-
+```bash
+sudo systemctl restart turret.service
 ```
-http://ir-turret.local:5000/
-```
-
----
-
-## ✅ You're Ready to Start Coding!
-
-Create `app.py` and `templates/index.html`, and begin building your turret logic!

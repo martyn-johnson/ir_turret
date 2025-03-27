@@ -2,14 +2,83 @@
 <html>
 <head>
     <title>IR Turret</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { margin: 0; background: black; text-align: center; }
-        img { width: 100%; max-width: 640px; }
+        body { margin: 0; background: black; color: white; font-family: sans-serif; text-align: center; }
+        #video-feed { width: 100vw; height: auto; }
+        .overlay {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .button {
+            padding: 12px 20px;
+            margin: 6px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        .dpad { display: grid; grid-template-columns: auto auto auto; gap: 5px; }
+        .dpad button { width: 60px; height: 60px; font-size: 20px; }
+        .toggles { display: flex; flex-direction: column; align-items: center; }
     </style>
 </head>
 <body>
-    <h2 style="color:white;">IR Turret Camera Feed</h2>
-    <img src="{{ url_for('video_feed') }}">
+    <img id="video-feed" src="{{ url_for('video_feed') }}" onclick="handleCalibrate(event)">
+
+    <div class="overlay">
+        <div class="dpad">
+            <button onclick="sendCommand('UP')">↑</button>
+            <div></div>
+            <button onclick="sendCommand('DOWN')">↓</button>
+            <button onclick="sendCommand('LEFT')">←</button>
+            <div></div>
+            <button onclick="sendCommand('RIGHT')">→</button>
+        </div>
+
+        <button class="button" onclick="sendCommand('FIRE')">🔥 FIRE</button>
+
+        <div class="toggles">
+            <label><input type="checkbox" id="trackToggle"> Track Faces</label>
+            <label><input type="checkbox" id="autoFireToggle"> Auto Fire</label>
+            <button class="button" onclick="toggleSettings()">Update Settings</button>
+            <button class="button" onclick="alert('Tap video to set new target')">Calibrate</button>
+        </div>
+    </div>
+
+    <script>
+        function sendCommand(cmd) {
+            fetch('/command/' + cmd)
+                .then(res => res.json())
+                .then(data => console.log(data));
+        }
+
+        function toggleSettings() {
+            const track = document.getElementById('trackToggle').checked;
+            const autoFire = document.getElementById('autoFireToggle').checked;
+            fetch('/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ track, auto_fire: autoFire })
+            });
+        }
+
+        function handleCalibrate(e) {
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            fetch('/calibrate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ x, y })
+            }).then(() => alert(`New target set: (${x}, ${y})`));
+        }
+    </script>
 </body>
 </html>
