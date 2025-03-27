@@ -22,9 +22,15 @@
             z-index: 0;
         }
 
-        #video-feed.calibrating {
-            background-color: rgba(255, 0, 0, 0.3); /* Transparent red tint */
-            mix-blend-mode: multiply;
+        #calibration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(255, 0, 0, 0.3); /* Transparent red overlay */
+            z-index: 1;
+            display: none; /* Hidden by default */
         }
 
         .overlay {
@@ -118,6 +124,7 @@
     </style>
 </head>
 <body>
+    <div id="calibration-overlay"></div> <!-- Red overlay for calibration mode -->
     <img id="video-feed" src="{{ url_for('video_feed') }}" onclick="handleCalibrate(event)">
 
     <div class="overlay">
@@ -219,12 +226,8 @@
 
         function toggleCalibrationMode(enable) {
             isCalibrating = enable !== undefined ? enable : !isCalibrating;
-            const videoFeed = document.getElementById('video-feed');
-            if (isCalibrating) {
-                videoFeed.classList.add('calibrating');
-            } else {
-                videoFeed.classList.remove('calibrating');
-            }
+            const calibrationOverlay = document.getElementById('calibration-overlay');
+            calibrationOverlay.style.display = isCalibrating ? 'block' : 'none';
         }
 
         let commandInterval;
