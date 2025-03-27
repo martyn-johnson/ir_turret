@@ -135,7 +135,7 @@
     <div class="preferences" id="prefPanel">
         <h3>Preferences</h3>
         <button class="close-pref" onclick="togglePreferences()">Close</button>
-        <button class="close-pref" onclick="togglePreferences(); alert('Tap video to calibrate target')">Calibrate</button>
+        <button class="close-pref" onclick="togglePreferences(); toggleCalibrationMode()">Calibrate</button>
         
         <label><input type="checkbox" id="trackToggle"> Track Faces</label>
         <label><input type="checkbox" id="autoFireToggle"> Auto Fire</label>
@@ -226,23 +226,6 @@
                 videoFeed.classList.remove('calibrating');
             }
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add a button or other mechanism to toggle calibration mode
-            const calibrateButton = document.createElement('button');
-            calibrateButton.textContent = "Toggle Calibration";
-            calibrateButton.style.position = "fixed";
-            calibrateButton.style.top = "10px";
-            calibrateButton.style.right = "10px";
-            calibrateButton.style.zIndex = "1000";
-            calibrateButton.style.padding = "10px";
-            calibrateButton.style.background = "#444";
-            calibrateButton.style.color = "white";
-            calibrateButton.style.border = "none";
-            calibrateButton.style.borderRadius = "5px";
-            calibrateButton.addEventListener('click', () => toggleCalibrationMode());
-            document.body.appendChild(calibrateButton);
-        });
 
         let commandInterval;
         let isLongPress = false;
