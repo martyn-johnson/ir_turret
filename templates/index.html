@@ -240,7 +240,7 @@
             const calibrationOverlay = document.getElementById('calibration-overlay');
             const controlOverlay = document.getElementById('control-overlay');
             calibrationOverlay.style.display = isCalibrating ? 'block' : 'none';
-            controlOverlay.style.display = isCalibrating ? 'none' : 'block'; // Hide controls during calibration
+            controlOverlay.style.display = isCalibrating ? 'none' : 'flex'; // Hide controls during calibration
         }
 
         let commandInterval;
