@@ -151,6 +151,9 @@
         <button class="close-pref" onclick="togglePreferences()">Close</button>
         <button class="close-pref" onclick="togglePreferences(); toggleCalibrationMode()">Calibrate</button>
         
+        <label for="serialPort">Serial Port</label>
+        <select id="serialPort"></select> <!-- Dropdown for serial ports -->
+
         <label><input type="checkbox" id="trackToggle"> Track Faces</label>
         <label><input type="checkbox" id="autoFireToggle"> Auto Fire</label>
 
@@ -322,6 +325,25 @@
                     enableFullscreen();
                 }
             });
+        });
+
+        function populateSerialPorts() {
+            fetch('/serial_ports')
+                .then(res => res.json())
+                .then(data => {
+                    const serialPortDropdown = document.getElementById('serialPort');
+                    serialPortDropdown.innerHTML = ''; // Clear existing options
+                    data.ports.forEach(port => {
+                        const option = document.createElement('option');
+                        option.value = port;
+                        option.textContent = port;
+                        serialPortDropdown.appendChild(option);
+                    });
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            populateSerialPorts(); // Populate serial ports on page load
         });
     </script>
 </body>

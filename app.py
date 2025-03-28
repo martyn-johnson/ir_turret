@@ -3,6 +3,7 @@ from picamera2 import Picamera2
 from turret_serial import TurretSerial
 import cv2
 import threading
+import serial.tools.list_ports
 
 app = Flask(__name__)
 
@@ -108,6 +109,11 @@ def update_settings():
         print(f"[ERROR] Failed to set camera settings: {e}")
 
     return jsonify(success=True)
+
+@app.route('/serial_ports', methods=['GET'])
+def list_serial_ports():
+    ports = [port.device for port in serial.tools.list_ports.comports()]
+    return jsonify(ports=ports)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
