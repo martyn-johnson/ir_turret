@@ -1,5 +1,6 @@
 from flask import Flask, render_template, Response, request, jsonify
 from picamera2 import Picamera2
+from turret_serial import TurretSerial
 import cv2
 import threading
 
@@ -23,6 +24,9 @@ picam2.set_controls({
     "Sharpness": 1.0,
     "AfMode": 1  # continuous autofocus
 })
+
+# Initialize serial communication with Arduino
+turret = TurretSerial('/dev/ttyACM0')  # Adjust if you're using a different port
 
 # Face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -68,6 +72,7 @@ def send_command(cmd):
     with lock:
         latest_command = cmd
         print(f"[COMMAND] Sent to Arduino: {cmd}")
+        turret.send(cmd)
     return jsonify(success=True, command=cmd)
 
 @app.route('/calibrate', methods=['POST'])

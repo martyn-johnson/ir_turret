@@ -103,7 +103,7 @@ Face detection is always turned on and highlighted in the feed with a bounding b
 Align camera field of view with actual dart trajectory by manually defining a custom **target zone**.
 
 ### Default Target Zone:
-- Center of the video frame (`x = 320`, `y = 240` for 640x480)
+- Center of the video frame (e.g. `x = 320`, `y = 240` for 640x480)
 
 ### Calibration Flow:
 1. User presses **Calibrate** in UI.

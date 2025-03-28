@@ -1,8 +1,16 @@
-# 🎯 Autonomous IR Turret with Face Tracking  
-## Powered by Raspberry Pi Zero 2 W + Camera Module 3  
-### Designed for Crunchlabs Hack Pack IR Turret (by Mark Rober)
+# 🎯 Autonomous IR Turret Face Tracking
+## Designed for Crunchlabs Hack Pack IR Turret (by Mark Rober) 
+### Using Raspberry Pi Zero 2 W + Camera Module 3 
 
-A mobile-friendly, Flask-powered web app to control and calibrate an autonomous infrared turret using a Raspberry Pi Zero 2 W and the Crunchlabs IR Turret. Features include face tracking, a full-screen live video stream, remote control, and serial communication with the turret's Arduino.
+A mobile-friendly, Flask-powered web app to control the Crunchlabs IR Turret using a Raspberry Pi Zero 2 W. Features include face tracking, a full-screen live video stream, and remote control, using serial communication with the turret's Arduino.
+
+---
+
+## Hardware Requirements
+
+- Crunchlabs IR Turret (by Mark Rober)
+- Raspberry Pi Zero 2 W (+ min 16gb SD Card)
+- Camera Module 3 (v3 Wide version)
 
 ---
 
@@ -61,6 +69,11 @@ Then install full OpenCV (for face detection):
 ```bash
 sudo apt remove python3-opencv -y
 pip3 install opencv-python --break-system-packages
+```
+Then install pyserial (may already be satisfied)
+
+```bash
+pip3 install pyserial --break-system-packages
 ```
 
 ---
@@ -146,7 +159,6 @@ http://ir-turret.local:5000/
 
 - All camera processing and face detection runs directly on the Pi
 - Web UI is built mobile-first (touch-friendly layout)
-- Serial communication is stubbed in for now (until Arduino is connected)
 - System Python is used (not virtualenv) for compatibility with `picamera2` and `libcamera`
 
 ---
@@ -156,11 +168,6 @@ http://ir-turret.local:5000/
 Project code is hosted here:  
 🔗 [https://github.com/martyn-johnson/ir_turret](https://github.com/martyn-johnson/ir_turret)
 
----
+Youtube
 
-## ✅ Next Up
-
-- Add real-time serial comms to Arduino
-- Prioritize targets by size or position
-- Add sound or face recognition
-- Score tracking or game mode
+🔗 [https://www.youtube.com/@atexj](https://www.youtube.com/@atexj)
