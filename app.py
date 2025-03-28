@@ -4,6 +4,7 @@ from turret_serial import TurretSerial
 import cv2
 import threading
 import serial.tools.list_ports
+import time  # Add this for introducing delays
 
 app = Flask(__name__)
 
@@ -33,7 +34,7 @@ turret = TurretSerial('/dev/ttyACM0')  # Adjust if you're using a different port
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
 # Globals
-target_x, target_y = 640, 360  # center of 1280x720
+target_x, target_y = 320, 180  # Adjusted for lower resolution (640x360)
 auto_track = False
 auto_fire = False
 latest_command = None
@@ -43,10 +44,13 @@ def generate_frames():
     global target_x, target_y
 
     while True:
+        start_time = time.time()  # Track start time for frame rate control
+
         frame = picam2.capture_array()
+        # Resize to lower resolution for faster processing
+        frame = cv2.resize(frame, (640, 360))
         # Ensure correct color conversion: RGB → BGR
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        frame = cv2.resize(frame, (1280, 720))
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -58,6 +62,10 @@ def generate_frames():
         _, buffer = cv2.imencode('.jpg', frame)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+
+        # Introduce a delay to limit frame rate (e.g., 10 FPS)
+        elapsed_time = time.time() - start_time
+        time.sleep(max(0, 0.1 - elapsed_time))  # 0.1 seconds per frame = 10 FPS
 
 @app.route('/')
 def index():
