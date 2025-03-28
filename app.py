@@ -41,7 +41,7 @@ latest_command = None
 lock = threading.Lock()
 
 def generate_frames():
-    global target_x, target_y
+    global target_x, target_y, auto_track
 
     while True:
         start_time = time.time()  # Track start time for frame rate control
@@ -56,6 +56,22 @@ def generate_frames():
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+            if auto_track:
+                # Calculate the center of the face
+                face_center_x = x + w // 2
+                face_center_y = y + h // 2
+
+                # Calculate the offset from the target crosshairs
+                offset_x = face_center_x - target_x
+                offset_y = face_center_y - target_y
+
+                # Send serial commands to adjust turret position
+                with lock:
+                    if abs(offset_x) > 10:  # Threshold to avoid jitter
+                        turret.send(f"X{offset_x}")
+                    if abs(offset_y) > 10:  # Threshold to avoid jitter
+                        turret.send(f"Y{offset_y}")
 
         cv2.drawMarker(frame, (target_x, target_y), (0, 0, 255), cv2.MARKER_CROSS, 30, 2)
 
