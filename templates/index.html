@@ -132,7 +132,12 @@
 </head>
 <body>
     <div id="calibration-overlay" onclick="handleCalibrate(event)"></div> <!-- Red overlay for calibration mode -->
-    <img id="video-feed" src="{{ url_for('video_feed') }}">
+    <img id="video-feed" src="{{ url_for('video_feed') }}" onerror="handleVideoError()">
+
+    <div id="camera-error" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 10px; text-align: center;">
+        <p>Camera feed is unavailable.</p>
+        <p>You can still use the controls below.</p>
+    </div>
 
     <div id="control-overlay">
         <div class="dpad-circle">
@@ -345,6 +350,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             populateSerialPorts(); // Populate serial ports on page load
         });
+
+        function handleVideoError() {
+            const videoFeed = document.getElementById('video-feed');
+            const cameraError = document.getElementById('camera-error');
+            videoFeed.style.display = 'none';
+            cameraError.style.display = 'block';
+        }
     </script>
 </body>
 </html>
