@@ -7,30 +7,24 @@ import serial.tools.list_ports
 
 app = Flask(__name__)
 
-try:
-    # Start camera at high resolution (wide format for Camera Module 3 Wide)
-    picam2 = Picamera2()
-    picam2.configure(picam2.create_preview_configuration(
-        main={"size": (1280, 720)},  # widescreen 16:9 ratio
-        controls={"AfMode": 1}       # Auto focus mode
-    ))
-    picam2.start()
+# Start camera at high resolution (wide format for Camera Module 3 Wide)
+picam2 = Picamera2()
+picam2.configure(picam2.create_preview_configuration(
+    main={"size": (1280, 720)},  # widescreen 16:9 ratio
+    controls={"AfMode": 1}       # Auto focus mode
+))
+picam2.start()
 
-    # Apply improved default controls
-    picam2.set_controls({
-        "AwbEnable": True,
-        "AeEnable": True,
-        "Brightness": 0.2,
-        "Contrast": 1.3,
-        "Saturation": 0.8,
-        "Sharpness": 1.0,
-        "AfMode": 1  # continuous autofocus
-    })
-    camera_available = True
-except Exception as e:
-    print(f"[ERROR] Camera initialization failed: {e}")
-    picam2 = None
-    camera_available = False
+# Apply improved default controls
+picam2.set_controls({
+    "AwbEnable": True,
+    "AeEnable": True,
+    "Brightness": 0.2,
+    "Contrast": 1.3,
+    "Saturation": 0.8,
+    "Sharpness": 1.0,
+    "AfMode": 1  # continuous autofocus
+})
 
 # Initialize serial communication with Arduino
 turret = TurretSerial('/dev/ttyACM0')  # Adjust if you're using a different port
@@ -43,40 +37,27 @@ target_x, target_y = 640, 360  # center of 1280x720
 auto_track = False
 auto_fire = False
 latest_command = None
-video_enabled = False  # Video feed disabled by default
 lock = threading.Lock()
 
 def generate_frames():
     global target_x, target_y
 
-    if not video_enabled:
-        while True:
-            # Generate a blank frame with a message
-            frame = cv2.putText(
-                cv2.imread("black.jpg"),  # Replace with a blank black image if needed
-                "Video feed disabled", (50, 360),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA
-            )
-            _, buffer = cv2.imencode('.jpg', frame)
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-    elif camera_available:
-        while True:
-            frame = picam2.capture_array()
-            # Ensure correct color conversion: RGB → BGR
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            frame = cv2.resize(frame, (1280, 720))
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    while True:
+        frame = picam2.capture_array()
+        # Ensure correct color conversion: RGB → BGR
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        frame = cv2.resize(frame, (1280, 720))
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-            for (x, y, w, h) in faces:
-                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
-            cv2.drawMarker(frame, (target_x, target_y), (0, 0, 255), cv2.MARKER_CROSS, 30, 2)
+        cv2.drawMarker(frame, (target_x, target_y), (0, 0, 255), cv2.MARKER_CROSS, 30, 2)
 
-            _, buffer = cv2.imencode('.jpg', frame)
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+        _, buffer = cv2.imencode('.jpg', frame)
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
 
 @app.route('/')
 def index():
@@ -85,20 +66,6 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route('/start_video', methods=['POST'])
-def start_video():
-    global video_enabled
-    video_enabled = True
-    print("[VIDEO] Video feed enabled")
-    return jsonify(success=True)
-
-@app.route('/stop_video', methods=['POST'])
-def stop_video():
-    global video_enabled
-    video_enabled = False
-    print("[VIDEO] Video feed disabled")
-    return jsonify(success=True)
 
 @app.route('/command/<cmd>', methods=['GET'])
 def send_command(cmd):
