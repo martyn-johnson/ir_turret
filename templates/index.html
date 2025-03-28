@@ -132,7 +132,7 @@
 </head>
 <body>
     <div id="calibration-overlay" onclick="handleCalibrate(event)"></div> <!-- Red overlay for calibration mode -->
-    <img id="video-feed" src="{{ url_for('video_feed') }}" onerror="handleVideoError()">
+    <img id="video-feed" src="{{ url_for('video_feed') }}" onerror="handleVideoError()" ondblclick="exitFullscreen()">
 
     <div id="camera-error" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 10px; text-align: center;">
         <p>Camera feed is unavailable.</p>
@@ -306,6 +306,16 @@
             }
         }
 
+        function exitFullscreen() {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else if (document.webkitFullscreenElement) { // Safari
+                document.webkitExitFullscreen();
+            } else if (document.msFullscreenElement) { // IE/Edge
+                document.msExitFullscreen();
+            }
+        }
+
         function isMobileDevice() {
             return /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
         }
@@ -329,6 +339,20 @@
                 if (touchEndY - touchStartY > 50) { // Swipe down threshold
                     enableFullscreen();
                 }
+            });
+
+            const videoFeed = document.getElementById('video-feed');
+            let lastTap = 0;
+
+            videoFeed.addEventListener('touchend', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+
+                if (tapLength < 300 && tapLength > 0) { // Detect double-tap
+                    exitFullscreen();
+                }
+
+                lastTap = currentTime;
             });
         });
 
