@@ -151,6 +151,11 @@
         <button class="fire-button" onclick="sendCommand('FIRE')">FIRE</button>
     </div>
 
+    <div id="video-controls" style="position: fixed; top: 10px; left: 10px; z-index: 2;">
+        <button onclick="startVideo()">Start Video</button>
+        <button onclick="stopVideo()">Stop Video</button>
+    </div>
+
     <div class="preferences" id="prefPanel">
         <h3>Preferences</h3>
         <button class="close-pref" onclick="togglePreferences()">Close</button>
@@ -396,6 +401,18 @@
             const cameraError = document.getElementById('camera-error');
             videoFeed.style.display = 'none';
             cameraError.style.display = 'block';
+        }
+
+        function startVideo() {
+            fetch('/start_video', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => console.log(data));
+        }
+
+        function stopVideo() {
+            fetch('/stop_video', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => console.log(data));
         }
     </script>
 </body>

@@ -43,23 +43,24 @@ target_x, target_y = 640, 360  # center of 1280x720
 auto_track = False
 auto_fire = False
 latest_command = None
+video_enabled = False  # Video feed disabled by default
 lock = threading.Lock()
 
 def generate_frames():
     global target_x, target_y
 
-    if not camera_available:
+    if not video_enabled:
         while True:
             # Generate a blank frame with a message
             frame = cv2.putText(
                 cv2.imread("black.jpg"),  # Replace with a blank black image if needed
-                "Camera not available", (50, 360),
+                "Video feed disabled", (50, 360),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA
             )
             _, buffer = cv2.imencode('.jpg', frame)
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-    else:
+    elif camera_available:
         while True:
             frame = picam2.capture_array()
             # Ensure correct color conversion: RGB → BGR
@@ -84,6 +85,20 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/start_video', methods=['POST'])
+def start_video():
+    global video_enabled
+    video_enabled = True
+    print("[VIDEO] Video feed enabled")
+    return jsonify(success=True)
+
+@app.route('/stop_video', methods=['POST'])
+def stop_video():
+    global video_enabled
+    video_enabled = False
+    print("[VIDEO] Video feed disabled")
+    return jsonify(success=True)
 
 @app.route('/command/<cmd>', methods=['GET'])
 def send_command(cmd):
