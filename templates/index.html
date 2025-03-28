@@ -132,7 +132,7 @@
 </head>
 <body>
     <div id="calibration-overlay" onclick="handleCalibrate(event)"></div> <!-- Red overlay for calibration mode -->
-    <img id="video-feed" src="{{ url_for('video_feed') }}" onerror="handleVideoError()" ondblclick="exitFullscreen()">
+    <img id="video-feed" src="{{ url_for('video_feed') }}" onerror="handleVideoError()">
 
     <div id="camera-error" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 10px; text-align: center;">
         <p>Camera feed is unavailable.</p>
@@ -295,26 +295,42 @@
             });
         });
 
-        function enableFullscreen() {
+        function toggleFullscreen() {
             const docEl = document.documentElement;
-            if (docEl.requestFullscreen) {
-                docEl.requestFullscreen();
-            } else if (docEl.webkitRequestFullscreen) { // Safari
-                docEl.webkitRequestFullscreen();
-            } else if (docEl.msRequestFullscreen) { // IE/Edge
-                docEl.msRequestFullscreen();
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen();
+                } else if (docEl.webkitRequestFullscreen) { // Safari
+                    docEl.webkitRequestFullscreen();
+                } else if (docEl.msRequestFullscreen) { // IE/Edge
+                    docEl.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { // Safari
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { // IE/Edge
+                    document.msExitFullscreen();
+                }
             }
         }
 
-        function exitFullscreen() {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            } else if (document.webkitFullscreenElement) { // Safari
-                document.webkitExitFullscreen();
-            } else if (document.msFullscreenElement) { // IE/Edge
-                document.msExitFullscreen();
-            }
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoFeed = document.getElementById('video-feed');
+            let lastTap = 0;
+
+            videoFeed.addEventListener('touchend', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+
+                if (tapLength < 300 && tapLength > 0) { // Detect double-tap
+                    toggleFullscreen();
+                }
+
+                lastTap = currentTime;
+            });
+        });
 
         function isMobileDevice() {
             return /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
@@ -349,7 +365,7 @@
                 const tapLength = currentTime - lastTap;
 
                 if (tapLength < 300 && tapLength > 0) { // Detect double-tap
-                    exitFullscreen();
+                    toggleFullscreen();
                 }
 
                 lastTap = currentTime;
