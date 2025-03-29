@@ -149,12 +149,12 @@
 
         <button class="pref-button" onclick="togglePreferences()">⚙</button>
         <button class="fire-button" 
-                onmousedown="startCommand('FIRE')" 
-                onmouseup="stopCommand()" 
-                onmouseleave="stopCommand()" 
-                ontouchstart="startCommand('FIRE')" 
-                ontouchend="stopCommand()" 
-                ontouchcancel="stopCommand()">FIRE</button>
+                onmousedown="startFireCommand()" 
+                onmouseup="stopFireCommand()" 
+                onmouseleave="stopFireCommand()" 
+                ontouchstart="startFireCommand()" 
+                ontouchend="stopFireCommand()" 
+                ontouchcancel="stopFireCommand()">FIRE</button>
     </div>
 
     <div class="preferences" id="prefPanel">
@@ -275,6 +275,36 @@
             isLongPress = false;
         }
 
+        let fireCommandTimeout;
+        let fireCommandInProgress = false;
+
+        function sendFireBurst() {
+            if (fireCommandInProgress) return; // Prevent multiple bursts from being queued
+            fireCommandInProgress = true;
+
+            // Send a burst of 2 fire commands
+            sendCommand('FIRE');
+            setTimeout(() => sendCommand('FIRE'), 50);
+
+            // Allow new commands after a short delay
+            setTimeout(() => {
+                fireCommandInProgress = false;
+            }, 200);
+        }
+
+        function startFireCommand() {
+            sendFireBurst(); // Send the initial burst immediately
+            fireCommandTimeout = setInterval(() => {
+                if (!fireCommandInProgress) {
+                    sendFireBurst(); // Send subsequent bursts while holding
+                }
+            }, 200); // Adjust interval as needed
+        }
+
+        function stopFireCommand() {
+            clearInterval(fireCommandTimeout); // Stop sending bursts when released
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const dpadButtons = document.querySelectorAll('.dpad-circle button');
             const fireButton = document.querySelector('.fire-button'); // Select fire button
@@ -303,22 +333,19 @@
             });
 
             // Add similar behavior for the fire button
-            fireButton.addEventListener('mousedown', () => startCommand('FIRE'));
-            fireButton.addEventListener('mouseup', stopCommand);
-            fireButton.addEventListener('mouseleave', stopCommand);
+            fireButton.addEventListener('mousedown', startFireCommand);
+            fireButton.addEventListener('mouseup', stopFireCommand);
+            fireButton.addEventListener('mouseleave', stopFireCommand);
 
             fireButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                startCommand('FIRE');
+                startFireCommand();
             });
             fireButton.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                if (!isLongPress) {
-                    sendCommand('FIRE');
-                }
-                stopCommand();
+                stopFireCommand();
             });
-            fireButton.addEventListener('touchcancel', stopCommand);
+            fireButton.addEventListener('touchcancel', stopFireCommand);
         });
 
         function toggleFullscreen() {
