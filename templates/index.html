@@ -278,13 +278,11 @@
         let fireCommandTimeout;
         let fireCommandInProgress = false;
 
-        function sendFireBurst() {
-            if (fireCommandInProgress) return; // Prevent multiple bursts from being queued
+        function startFireCommand() {
+            if (fireCommandInProgress) return; // Prevent multiple commands from being queued
             fireCommandInProgress = true;
 
-            // Send a burst of 2 fire commands
-            sendCommand('FIRE');
-            setTimeout(() => sendCommand('FIRE'), 50);
+            sendCommand('FIRE'); // Send a single fire command
 
             // Allow new commands after a short delay
             setTimeout(() => {
@@ -292,17 +290,8 @@
             }, 200);
         }
 
-        function startFireCommand() {
-            sendFireBurst(); // Send the initial burst immediately
-            fireCommandTimeout = setInterval(() => {
-                if (!fireCommandInProgress) {
-                    sendFireBurst(); // Send subsequent bursts while holding
-                }
-            }, 200); // Adjust interval as needed
-        }
-
         function stopFireCommand() {
-            clearInterval(fireCommandTimeout); // Stop sending bursts when released
+            clearTimeout(fireCommandTimeout); // Clear any ongoing intervals or timeouts
         }
 
         document.addEventListener('DOMContentLoaded', function() {
