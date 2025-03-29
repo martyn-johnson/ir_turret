@@ -45,6 +45,35 @@ auto_track = False
 auto_fire = False
 latest_command = None
 lock = threading.Lock()
+last_command_time = 0  # For rate limiting
+command_interval = 0.2  # Minimum time (in seconds) between commands
+
+def send_directional_command(offset_x, offset_y):
+    """
+    Sends directional commands (UP, DOWN, LEFT, RIGHT) based on offsets.
+    Includes a buffer and rate-limiting mechanism.
+    """
+    global last_command_time
+
+    # Buffer to avoid jitter
+    buffer = 15
+
+    # Get current time for rate limiting
+    current_time = time.time()
+
+    # Determine direction based on offsets
+    if abs(offset_x) > buffer or abs(offset_y) > buffer:
+        if current_time - last_command_time >= command_interval:
+            with lock:
+                if offset_x > buffer:
+                    turret.send("RIGHT")
+                elif offset_x < -buffer:
+                    turret.send("LEFT")
+                if offset_y > buffer:
+                    turret.send("DOWN")
+                elif offset_y < -buffer:
+                    turret.send("UP")
+            last_command_time = current_time
 
 def generate_frames():
     global target_x, target_y, auto_track
@@ -76,12 +105,8 @@ def generate_frames():
                 offset_x = face_center_x - target_x
                 offset_y = face_center_y - target_y
 
-                # Send serial commands to adjust turret position
-                with lock:
-                    if abs(offset_x) > 10:  # Threshold to avoid jitter
-                        turret.send(f"X{offset_x}")
-                    if abs(offset_y) > 10:  # Threshold to avoid jitter
-                        turret.send(f"Y{offset_y}")
+                # Send directional commands
+                send_directional_command(offset_x, offset_y)
 
         cv2.drawMarker(frame, (target_x, target_y), (0, 0, 255), cv2.MARKER_CROSS, 30, 2)
 
