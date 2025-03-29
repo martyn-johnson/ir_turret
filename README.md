@@ -27,6 +27,42 @@ A mobile-friendly, Flask-powered web app to control the Crunchlabs IR Turret usi
 
 ## ⚙️ Setup Instructions (Raspberry Pi Zero 2 W + Pi Camera 3)
 
+### Arduino Code
+
+Go to https://ide.crunchlabs.com/editor/8718988640487 or get the Arduino IDE (https://www.arduino.cc/en/software/) and we need to add some code to the sketch.
+
+Add this inside your existing loop() and outside the if (IrReceiver.decode()) block, so both IR and serial input can be handled independently.
+
+```bash
+// Check for serial input from Raspberry Pi
+if (Serial.available()) {
+    String cmd = Serial.readStringUntil('\n'); // Read full command line
+    cmd.trim(); // Remove whitespace or newlines
+
+    if (cmd == "UP") {
+        upMove(1);
+    } else if (cmd == "DOWN") {
+        downMove(1);
+    } else if (cmd == "LEFT") {
+        leftMove(1);
+    } else if (cmd == "RIGHT") {
+        rightMove(1);
+    } else if (cmd == "FIRE") {
+        fire();
+    } else if (cmd == "FIREALL") {
+        fireAll();
+    } else if (cmd == "YES") {
+        shakeHeadYes(3);
+    } else if (cmd == "NO") {
+        shakeHeadNo(3);
+    } else {
+        Serial.print("Unknown command: ");
+        Serial.println(cmd);
+    }
+}
+```
+
+
 ### 1. Flash Raspberry Pi OS (Bookworm or later)
 - Use **Raspberry Pi Imager**:
   - Choose: Raspberry Pi OS Lite (64-bit)
