@@ -75,7 +75,7 @@
         .fire-button {
             width: 80px;
             height: 80px;
-            background: red;
+            background: rgba(236, 29, 29, 0.8);
             border-radius: 50%;
             border: none;
             color: white;
@@ -148,7 +148,13 @@
         </div>
 
         <button class="pref-button" onclick="togglePreferences()">⚙</button>
-        <button class="fire-button" onclick="sendCommand('FIRE')">FIRE</button>
+        <button class="fire-button" 
+                onmousedown="startCommand('FIRE')" 
+                onmouseup="stopCommand()" 
+                onmouseleave="stopCommand()" 
+                ontouchstart="startCommand('FIRE')" 
+                ontouchend="stopCommand()" 
+                ontouchcancel="stopCommand()">FIRE</button>
     </div>
 
     <div class="preferences" id="prefPanel">
@@ -271,6 +277,8 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             const dpadButtons = document.querySelectorAll('.dpad-circle button');
+            const fireButton = document.querySelector('.fire-button'); // Select fire button
+
             dpadButtons.forEach(button => {
                 const command = button.className.toUpperCase();
 
@@ -293,6 +301,24 @@
                 });
                 button.addEventListener('touchcancel', stopCommand);
             });
+
+            // Add similar behavior for the fire button
+            fireButton.addEventListener('mousedown', () => startCommand('FIRE'));
+            fireButton.addEventListener('mouseup', stopCommand);
+            fireButton.addEventListener('mouseleave', stopCommand);
+
+            fireButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                startCommand('FIRE');
+            });
+            fireButton.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                if (!isLongPress) {
+                    sendCommand('FIRE');
+                }
+                stopCommand();
+            });
+            fireButton.addEventListener('touchcancel', stopCommand);
         });
 
         function toggleFullscreen() {

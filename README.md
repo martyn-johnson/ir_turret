@@ -1,4 +1,4 @@
-# 🎯 Autonomous IR Turret Face Tracking
+# 🎯 Web Browser Based Remote and Autonomous Face Tracking
 ## Designed for Crunchlabs Hack Pack IR Turret (by Mark Rober) 
 ### Using Raspberry Pi Zero 2 W + Camera Module 3 
 
@@ -11,6 +11,8 @@ A mobile-friendly, Flask-powered web app to control the Crunchlabs IR Turret usi
 - Crunchlabs IR Turret (by Mark Rober)
 - Raspberry Pi Zero 2 W (+ min 16gb SD Card)
 - Camera Module 3 (v3 Wide version)
+- USB A to microB cable (to power the Pi from the battery pack)
+- Micro-B USB to USB A female cable (power and serial comms from the Pi to the Adruino)
 
 ---
 
@@ -30,6 +32,13 @@ A mobile-friendly, Flask-powered web app to control the Crunchlabs IR Turret usi
 ### Arduino Code
 
 Go to https://ide.crunchlabs.com/editor/8718988640487 or get the Arduino IDE (https://www.arduino.cc/en/software/) and we need to add some code to the sketch.
+
+I reduced the Yaw values to improve precision:
+
+```bash
+int yawMoveSpeed = 40;    // Reduce speed (from 90 to 40)
+int yawPrecision = 80;    // Reduce duration (from 150 to 80)
+```
 
 Add this inside your existing loop() and outside the if (IrReceiver.decode()) block, so both IR and serial input can be handled independently.
 
