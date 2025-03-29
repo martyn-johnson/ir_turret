@@ -148,13 +148,7 @@
         </div>
 
         <button class="pref-button" onclick="togglePreferences()">⚙</button>
-        <button class="fire-button" 
-                onmousedown="startCommand('FIRE')" 
-                onmouseup="stopCommand()" 
-                onmouseleave="stopCommand()" 
-                ontouchstart="startCommand('FIRE')" 
-                ontouchend="stopCommand()" 
-                ontouchcancel="stopCommand()">FIRE</button>
+        <button class="fire-button" onclick="sendCommand('FIRE')">FIRE</button>
     </div>
 
     <div class="preferences" id="prefPanel">
@@ -275,35 +269,8 @@
             isLongPress = false;
         }
 
-        let fireCommandInterval;
-        let fireCommandInProgress = false;
-
-        function sendFireCommand() {
-            if (fireCommandInProgress) return; // Prevent multiple commands from being queued
-            fireCommandInProgress = true;
-
-            sendCommand('FIRE'); // Send a single fire command
-
-            // Allow new commands after a short delay
-            setTimeout(() => {
-                fireCommandInProgress = false;
-            }, 200);
-        }
-
-        function startFireCommand() {
-            sendFireCommand(); // Send the initial command immediately
-            fireCommandInterval = setInterval(() => {
-                sendFireCommand(); // Continuously send commands while holding
-            }, 200); // Adjust interval as needed
-        }
-
-        function stopFireCommand() {
-            clearInterval(fireCommandInterval); // Stop sending commands when released
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
             const dpadButtons = document.querySelectorAll('.dpad-circle button');
-            const fireButton = document.querySelector('.fire-button'); // Select fire button
 
             dpadButtons.forEach(button => {
                 const command = button.className.toUpperCase();
@@ -328,20 +295,6 @@
                 button.addEventListener('touchcancel', stopCommand);
             });
 
-            // Add similar behavior for the fire button
-            fireButton.addEventListener('mousedown', () => startCommand('FIRE'));
-            fireButton.addEventListener('mouseup', stopCommand);
-            fireButton.addEventListener('mouseleave', stopCommand);
-
-            fireButton.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                startCommand('FIRE');
-            });
-            fireButton.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                stopCommand();
-            });
-            fireButton.addEventListener('touchcancel', stopCommand);
         });
 
         function toggleFullscreen() {
