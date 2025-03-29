@@ -261,7 +261,8 @@
         function startCommand(cmd) {
             isLongPress = true;
             sendCommand(cmd);
-            commandInterval = setInterval(() => sendCommand(cmd), 100);
+            const interval = cmd === 'FIRE' ? 500 : 100;
+            commandInterval = setInterval(() => sendCommand(cmd), interval);
         }
 
         function stopCommand() {
