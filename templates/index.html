@@ -275,10 +275,10 @@
             isLongPress = false;
         }
 
-        let fireCommandTimeout;
+        let fireCommandInterval;
         let fireCommandInProgress = false;
 
-        function startFireCommand() {
+        function sendFireCommand() {
             if (fireCommandInProgress) return; // Prevent multiple commands from being queued
             fireCommandInProgress = true;
 
@@ -290,8 +290,15 @@
             }, 200);
         }
 
+        function startFireCommand() {
+            sendFireCommand(); // Send the initial command immediately
+            fireCommandInterval = setInterval(() => {
+                sendFireCommand(); // Continuously send commands while holding
+            }, 200); // Adjust interval as needed
+        }
+
         function stopFireCommand() {
-            clearTimeout(fireCommandTimeout); // Clear any ongoing intervals or timeouts
+            clearInterval(fireCommandInterval); // Stop sending commands when released
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -321,7 +328,7 @@
                 button.addEventListener('touchcancel', stopCommand);
             });
 
-            // Add similar behavior for the fire button
+            // Add event listeners for the fire button
             fireButton.addEventListener('mousedown', startFireCommand);
             fireButton.addEventListener('mouseup', stopFireCommand);
             fireButton.addEventListener('mouseleave', stopFireCommand);
