@@ -72,7 +72,7 @@
         .dpad-circle .left  { left: -5px; top: 50px; } /* Adjusted for larger size */
         .dpad-circle .right { right: -5px; top: 50px; } /* Adjusted for larger size */
 
-        .fire-button {
+        .fire {
             width: 80px;
             height: 80px;
             background: rgba(236, 29, 29, 0.8);
@@ -148,7 +148,7 @@
         </div>
 
         <button class="pref-button" onclick="togglePreferences()">⚙</button>
-        <button class="fire-button" onclick="sendCommand('FIRE')">FIRE</button>
+        <button class="fire" onclick="sendCommand('FIRE')">FIRE</button>
     </div>
 
     <div class="preferences" id="prefPanel">
@@ -270,7 +270,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const dpadButtons = document.querySelectorAll('.dpad-circle button');
+            const dpadButtons = document.querySelectorAll('.dpad-circle button, .fire'); // Include fire button
 
             dpadButtons.forEach(button => {
                 const command = button.className.toUpperCase();
