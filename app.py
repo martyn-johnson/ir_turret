@@ -9,23 +9,29 @@ import time  # Add this for introducing delays
 app = Flask(__name__)
 
 # Start camera at high resolution (wide format for Camera Module 3 Wide)
-picam2 = Picamera2()
-picam2.configure(picam2.create_preview_configuration(
-    main={"size": (1280, 720)},  # widescreen 16:9 ratio
-    controls={"AfMode": 1}       # Auto focus mode
-))
-picam2.start()
+try:
+    # Attempt to initialize the camera
+    picam2 = Picamera2()
+    picam2.configure(picam2.create_preview_configuration(
+        main={"size": (1280, 720)},  # widescreen 16:9 ratio
+        controls={"AfMode": 1}       # Auto focus mode
+    ))
+    picam2.start()
 
-# Apply improved default controls
-picam2.set_controls({
-    "AwbEnable": True,
-    "AeEnable": True,
-    "Brightness": 0.2,
-    "Contrast": 1.3,
-    "Saturation": 0.8,
-    "Sharpness": 1.0,
-    "AfMode": 1  # continuous autofocus
-})
+    # Apply improved default controls
+    picam2.set_controls({
+        "AwbEnable": True,
+        "AeEnable": True,
+        "Brightness": 0.2,
+        "Contrast": 1.3,
+        "Saturation": 0.8,
+        "Sharpness": 1.0,
+        "AfMode": 1  # continuous autofocus
+    })
+    camera_available = True
+except Exception as e:
+    print(f"[ERROR] Camera initialization failed: {e}")
+    camera_available = False
 
 # Initialize serial communication with Arduino
 turret = TurretSerial('/dev/ttyUSB0')  # Adjust if you're using a different port
@@ -42,6 +48,10 @@ lock = threading.Lock()
 
 def generate_frames():
     global target_x, target_y, auto_track
+
+    if not camera_available:
+        print("[INFO] Camera is not available. Video feed is disabled.")
+        return
 
     while True:
         start_time = time.time()  # Track start time for frame rate control
@@ -89,6 +99,8 @@ def index():
 
 @app.route('/video_feed')
 def video_feed():
+    if not camera_available:
+        return jsonify(error="Camera not available"), 503
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/command/<cmd>', methods=['GET'])

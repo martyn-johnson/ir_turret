@@ -132,7 +132,7 @@
 </head>
 <body>
     <div id="calibration-overlay" onclick="handleCalibrate(event)"></div> <!-- Red overlay for calibration mode -->
-    <img id="video-feed" src="{{ url_for('video_feed') }}" onerror="handleVideoError()" style="width: 640px; height: 360px;">
+    <img id="video-feed" src="{{ url_for('video_feed') }}" onerror="handleVideoError()" style="width: 640px; height: 360px; display: none;"> <!-- Initially hidden -->
 
     <div id="camera-error" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 10px; text-align: center;">
         <p>Camera feed is unavailable.</p>
@@ -400,6 +400,22 @@
             videoFeed.style.display = 'none';
             cameraError.style.display = 'block';
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoFeed = document.getElementById('video-feed');
+            const cameraError = document.getElementById('camera-error');
+
+            fetch('/video_feed')
+                .then(response => {
+                    if (response.status === 503) {
+                        throw new Error("Camera not available");
+                    }
+                    videoFeed.style.display = 'block';
+                })
+                .catch(() => {
+                    cameraError.style.display = 'block';
+                });
+        });
     </script>
 </body>
 </html>
