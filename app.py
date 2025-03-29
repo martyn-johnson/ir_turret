@@ -28,7 +28,7 @@ picam2.set_controls({
 })
 
 # Initialize serial communication with Arduino
-turret = TurretSerial('/dev/ttyACM0')  # Adjust if you're using a different port
+turret = TurretSerial('/dev/ttyUSB0')  # Adjust if you're using a different port
 
 # Face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
